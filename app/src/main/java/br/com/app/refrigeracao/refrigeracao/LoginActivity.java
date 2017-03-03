@@ -1,5 +1,6 @@
 package br.com.app.refrigeracao.refrigeracao;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -7,6 +8,14 @@ import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
+
+import com.facebook.CallbackManager;
+import com.facebook.FacebookCallback;
+import com.facebook.FacebookException;
+import com.facebook.login.LoginManager;
+import com.facebook.login.LoginResult;
+import com.facebook.login.widget.LoginButton;
 
 /**
  * A login screen that offers login via email/password.
@@ -14,6 +23,8 @@ import android.view.View;
 public class LoginActivity extends AppCompatActivity {
 
     private View decoreView;
+    private LoginButton loginButton;
+    private CallbackManager callbackManager;
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
@@ -23,6 +34,56 @@ public class LoginActivity extends AppCompatActivity {
 
         // initializing decoreView object used for show/hide status_bar and navigation_bar
         decoreView = getWindow().getDecorView();
+
+        callbackManager = CallbackManager.Factory.create();
+        loginButton = (LoginButton) findViewById(R.id.login_button);
+        loginButton.setReadPermissions("email");
+
+        // Callback registration
+        loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
+            @Override
+            public void onSuccess(LoginResult loginResult) {
+                showMessage("RegisterSucess");
+            }
+
+            @Override
+            public void onCancel() {
+                showMessage("RegisterCancel");
+            }
+
+            @Override
+            public void onError(FacebookException exception) {
+                showMessage("RegisterError");
+            }
+        });
+
+        LoginManager.getInstance().registerCallback(callbackManager,
+                new FacebookCallback<LoginResult>() {
+                    @Override
+                    public void onSuccess(LoginResult loginResult) {
+                        showMessage("LoginSucess");
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        showMessage("LoginCancel");
+                    }
+
+                    @Override
+                    public void onError(FacebookException exception) {
+                        showMessage("LoginError");
+                    }
+                });
+    }
+
+    private void showMessage(String loginSucess) {
+        Toast.makeText(this, loginSucess,Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        callbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
